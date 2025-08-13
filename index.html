@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireBattle - Free Fire Tournament</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- AOS CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --dark-bg: #1a1a2e;
+            --neon-blue: #00f0ff;
+            --neon-purple: #f000ff;
+            --neon-green: #00ff88;
+            --text-color: #e0e0e0;
+            /* Glow effect levels */
+            --glow-spread: 0 0 10px, 0 0 20px, 0 0 30px, 0 0 40px, 0 0 50px;
+        }
+
+        /* Basic Reset and Body Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scroll from animations */
+            scroll-behavior: smooth;
+        }
+
+        /* Reusable Container for Content Width */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 1. Header - Title Section */
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50vh; /* Takes at least half of the viewport height */
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1c); /* Subtle gradient background */
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.2); /* Bottom border with glow */
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.1);
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 10vw, 8rem); /* Responsive font size */
+            font-weight: 700;
+            color: var(--text-color);
+            text-shadow: var(--glow-spread) var(--neon-blue); /* Initial glow */
+            white-space: nowrap; /* Keep text on one line */
+            letter-spacing: 5px;
+            position: relative;
+            overflow: hidden; /* For letter entrance animation */
+            text-align: center;
+        }
+
+        .logo-text span.char {
+            display: inline-block; /* Allows individual letter animation */
+            opacity: 0;
+            transform: translateY(50px);
+            text-shadow: none; /* Initial state, animated later by GSAP */
+        }
+
+        /* 2. Animated Counters Section */
+        .counters-section {
+            padding: 80px 20px;
+            background-color: #121220; /* Slightly different dark background */
+            text-align: center;
+        }
+
+        .counters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid columns */
+            gap: 40px;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .counter-item {
+            background-color: #2a2a3e;
+            padding: 40px 20px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease; /* Smooth transition for hover effects */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-item:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.4);
+            transform: translateY(-5px); /* Slight lift on hover */
+        }
+
+        .counter-item .number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-shadow: var(--glow-spread) var(--neon-blue);
+            margin-bottom: 10px;
+            display: inline-block; /* For GSAP transformations */
+        }
+
+        .counter-item p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        /* 3. Screenshot Section */
+        .screenshots-section {
+            padding: 80px 0;
+            background-color: var(--dark-bg);
+            text-align: center;
+        }
+
+        .screenshots-section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--neon-purple);
+            text-shadow: var(--glow-spread) var(--neon-purple);
+            margin-bottom: 60px;
+        }
+
+        .iphone-slider-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px; /* Max width for the slider area */
+            margin: 0 auto;
+        }
+
+        .iphone-frame {
+            position: relative;
+            width: clamp(280px, 60vw, 350px); /* Responsive iPhone frame width */
+            height: clamp(560px, 120vw, 700px); /* Responsive iPhone frame height (approx 2x width) */
+            background-color: #000;
+            border-radius: 50px; /* Curved edges of the phone */
+            border: 8px solid #333;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            margin: 0 auto; /* Center the frame */
+            overflow: hidden; /* Hide parts of screenshot outside the screen */
+            z-index: 10; /* Ensure frame is above other elements */
+        }
+
+        .iphone-frame::before { /* Notch/Speaker */
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background-color: #000;
+            border-radius: 15px;
+            z-index: 11; /* Notch above the frame */
+        }
+
+        .iphone-screen {
+            position: absolute;
+            top: 15px; /* Adjust to fit inside frame, accounting for bezel/notch */
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            background-color: #333; /* Placeholder for screen */
+            overflow: hidden;
+            border-radius: 35px; /* Inner screen border radius */
+        }
+
+        .screenshot-swiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .screenshot-swiper .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Make slide take full width of swiper */
+            height: 100%;
+        }
+
+        .screenshot-swiper img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the screen area */
+            border-radius: 35px; /* Match inner screen border radius */
+            transform: translateZ(0); /* For smooth GPU acceleration with GSAP */
+        }
+
+        /* Swiper Navigation Customization */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: var(--neon-blue) !important; /* Override Swiper's default color */
+            filter: drop-shadow(0 0 5px var(--neon-blue));
+            transition: all 0.3s ease;
+            top: 50%; /* Center vertically relative to the slider container */
+            transform: translateY(-50%);
+        }
+        .swiper-button-next:hover,
+        .swiper-button-prev:hover {
+            transform: translateY(-50%) scale(1.1); /* Slight zoom on hover */
+            filter: drop-shadow(0 0 10px var(--neon-blue));
+        }
+
+        .swiper-button-prev {
+            left: 20px; /* Position relative to slider container */
+        }
+        .swiper-button-next {
+            right: 20px; /* Position relative to slider container */
+        }
+
+        @media (max-width: 768px) {
+            .swiper-button-next,
+            .swiper-button-prev {
+                top: auto; /* Reset top */
+                bottom: -40px; /* Move buttons below the slider on mobile */
+                transform: none; /* Reset transform */
+            }
+            .swiper-button-prev {
+                left: 30%; /* Adjust position for mobile */
+            }
+            .swiper-button-next {
+                right: 30%; /* Adjust position for mobile */
+            }
+             .swiper-pagination {
+                display: none; /* Hide pagination on smaller screens if buttons are moved */
+             }
+        }
+
+
+        .swiper-pagination-bullet {
+            background: rgba(255, 255, 255, 0.4) !important;
+            opacity: 0.7 !important;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: var(--neon-blue) !important;
+            opacity: 1 !important;
+            box-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        /* 4. Download Button Section */
+        .download-section {
+            padding: 100px 20px;
+            text-align: center;
+            background-color: #121220;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: var(--text-color);
+            background: #2a2a3e; /* Base background for the button */
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden; /* Crucial for gradient border effect */
+            transition: all 0.3s ease;
+            z-index: 1; /* Ensures text and arrow are above pseudo-elements */
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Animated Gradient Border using pseudo-elements */
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: -200%;
+            left: -200%;
+            width: 400%;
+            height: 400%;
+            background: conic-gradient(from 0deg, transparent 0%, var(--neon-blue) 10%, var(--neon-purple) 20%, var(--neon-green) 30%, transparent 40%);
+            animation: rotateGradient 4s linear infinite;
+            z-index: -1; /* Behind the button content */
+            transition: transform 0.3s ease;
+        }
+        
+        .download-btn::after {
+            content: '';
+            position: absolute;
+            inset: 2px; /* This creates the inner border effect (hides part of the gradient) */
+            background: #2a2a3e; /* Matches button's base background */
+            border-radius: 8px; /* Slightly smaller to create the border */
+            z-index: -1; /* Behind the gradient */
+        }
+
+        @keyframes rotateGradient {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .download-btn .arrow {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        /* 5. Footer */
+        footer {
+            background-color: #0d0d1a;
+            color: var(--text-color);
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            border-top: 2px solid rgba(0, 255, 255, 0.1);
+        }
+
+        footer a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--neon-green);
+        }
+
+        /* Mobile Responsiveness - Media Queries */
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: clamp(2rem, 12vw, 5rem); /* Adjust for smaller screens */
+                letter-spacing: 2px;
+            }
+
+            .counters-grid {
+                grid-template-columns: 1fr; /* Stack counters vertically on small screens */
+            }
+
+            .counter-item {
+                padding: 30px 15px;
+            }
+
+            .counter-item .number {
+                font-size: clamp(2rem, 8vw, 3rem);
+            }
+
+            .counter-item p {
+                font-size: clamp(0.9rem, 3vw, 1.1rem);
+            }
+
+            .screenshots-section h2 {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 40px;
+            }
+
+            .iphone-frame {
+                width: clamp(200px, 75vw, 300px); /* Adjust iPhone frame size for mobile */
+                height: clamp(400px, 150vw, 600px);
+                border-radius: 40px;
+                border-width: 6px;
+            }
+
+            .iphone-frame::before {
+                width: 90px;
+                height: 20px;
+                border-radius: 12px;
+            }
+
+            .iphone-screen {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                border-radius: 28px;
+            }
+
+            .download-btn {
+                padding: 15px 30px;
+                font-size: clamp(1rem, 4vw, 1.5rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="logo-text">FireBattle</h1>
+    </header>
+
+    <main>
+        <section class="counters-section">
+            <div class="container">
+                <div class="counters-grid">
+                    <div class="counter-item" data-aos="fade-up" data-aos-once="true" data-aos-delay="100">
+                        <span class="number" data-target="1000" data-animation-type="shake">0</span>
+                        <p>Tournaments Hosted</p>
+                    </div>
+                    <div class="counter-item" data-aos="fade-up" data-aos-once="true" data-aos-delay="300">
+                        <span class="number" data-target="1000" data-animation-type="zoom">0</span>
+                        <p>Tournaments Played</p>
+                    </div>
+                    <div class="counter-item" data-aos="fade-up" data-aos-once="true" data-aos-delay="500">
+                        <span class="number" data-target="5000" data-animation-type="slide">0</span>
+                        <p>Daily Winners</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="screenshots-section">
+            <div class="container">
+                <h2>App Screenshots</h2>
+                <div class="iphone-slider-container">
+                    <div class="iphone-frame">
+                        <div class="iphone-screen">
+                            <!-- Swiper -->
+                            <div class="swiper screenshot-swiper">
+                                <div class="swiper-wrapper">
+                                    <!-- Placeholder Images - Replace with actual paths -->
+                                    <div class="swiper-slide"><img src="https://i.ibb.co/KjJCFWf1/Screenshot-20250813-094315.jpg" alt="Screenshot 1"></div>
+                                    <div class="swiper-slide"><img src="https://i.ibb.co/4wzc9pK1/Screenshot-20250813-094321.jpg" alt="Screenshot 2"></div>
+                                    <div class="swiper-slide"><img src="https://i.ibb.co/4wzc9pK1/Screenshot-20250813-094321.jpg" alt="Screenshot 3"></div>
+                                    <div class="swiper-slide"><img src="https://i.ibb.co/6RvnKjYp/Screenshot-20250813-094349.jpg" alt="Screenshot 4"></div>
+                                    <div class="swiper-slide"><img src="https://i.ibb.co/MyYD6BxS/Screenshot-20250813-094346.jpg" alt="Screenshot 5"></div>
+                                </div>
+                                <!-- If we need pagination -->
+                                <div class="swiper-pagination"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- If we need navigation buttons -->
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="download-section">
+            <div class="container">
+                <!-- Replace #your-download-link with your actual download URL -->
+                <a href="FireBattle.apk" class="download-btn">
+                    <span>Download Now</span>
+                    <span class="arrow">&#x2192;</span> <!-- Unicode right arrow -->
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 By FireBattle. All rights reserved.</p>
+            <p><a href="#">Privacy Policy</a></p>
+        </div>
+    </footer>
+
+    <!-- GSAP Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <!-- GSAP ScrollTrigger Plugin (Optional, for more advanced scroll animations) -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script> -->
+    <!-- AOS Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Swiper Library -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialize AOS (Animate On Scroll)
+            AOS.init({
+                duration: 1000, /* Animation duration */
+                once: true,    /* Whether animation should happen only once */
+                mirror: false, /* Whether elements should animate out while scrolling past them */
+            });
+
+            // 2. GSAP for 'FireBattle' Title Animation
+            const logoText = document.querySelector('.logo-text');
+            const textContent = logoText.textContent;
+            logoText.innerHTML = ''; // Clear original text to wrap characters in spans
+            let chars = [];
+            for (let i = 0; i < textContent.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.classList.add('char');
+                charSpan.textContent = textContent[i];
+                logoText.appendChild(charSpan);
+                chars.push(charSpan);
+            }
+
+            // Letter-by-letter entrance animation
+            gsap.fromTo(chars, 
+                { opacity: 0, y: 50, textShadow: 'none' }, // Initial state
+                { 
+                    opacity: 1, 
+                    y: 0, 
+                    stagger: 0.08, // Delay between each character's animation
+                    duration: 0.8, 
+                    ease: "back.out(1.7)", // Bounce effect
+                    onComplete: () => {
+                        // Continuous glowing text animation after entrance
+                        gsap.to(chars, {
+                            textShadow: '0 0 5px var(--neon-blue), 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue), 0 0 40px var(--neon-blue)',
+                            duration: 1.5,
+                            repeat: -1, // Infinite repeat
+                            yoyo: true, // Go back and forth
+                            ease: "sine.inOut" // Smooth easing
+                        });
+                    }
+                }
+            );
+
+            // 3. Animated Counters Section (GSAP with Intersection Observer)
+            const counters = document.querySelectorAll('.counter-item .number');
+
+            counters.forEach(counter => {
+                const target = parseInt(counter.dataset.target); // Get target value from data-target
+                const type = counter.dataset.animationType; // Get animation type
+
+                // Use Intersection Observer to trigger animation when counter comes into view
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // Animate number count up
+                            gsap.to(counter, {
+                                innerText: target, // Animate the innerText property
+                                duration: 2.5,
+                                ease: "power1.out",
+                                snap: { innerText: 1 }, // Ensure integers are displayed
+                                onUpdate: function() {
+                                    // Format number with commas (e.g., 1000 -> 1,000)
+                                    counter.textContent = Math.round(this.targets()[0].innerText).toLocaleString();
+                                },
+                                onComplete: () => {
+                                    // Apply specific animation after the count finishes
+                                    if (type === 'shake') {
+                                        gsap.to(counter, { 
+                                            x: "+=10", // Move 10px right
+                                            yoyo: true, 
+                                            repeat: 3, // Shake 3 times
+                                            duration: 0.1, // Quick shake
+                                            ease: "power1.inOut",
+                                            clearProps: "x" // Remove inline style after animation
+                                        });
+                                    } else if (type === 'zoom') {
+                                        gsap.fromTo(counter, 
+                                            { scale: 1 }, 
+                                            { 
+                                                scale: 1.1, // Zoom in to 110%
+                                                yoyo: true, 
+                                                repeat: 1, // Zoom in and back once
+                                                duration: 0.3, 
+                                                ease: "power1.inOut",
+                                                clearProps: "scale"
+                                            }
+                                        );
+                                    } else if (type === 'slide') {
+                                        gsap.fromTo(counter, 
+                                            { x: -20, opacity: 0 }, // Start from left, invisible
+                                            { 
+                                                x: 0, 
+                                                opacity: 1, 
+                                                duration: 0.8, 
+                                                ease: "back.out(1.7)", // Slide in with bounce
+                                                clearProps: "x,opacity"
+                                            }
+                                        );
+                                    }
+                                }
+                            });
+                            observer.unobserve(entry.target); // Stop observing once animated
+                        }
+                    });
+                }, { threshold: 0.5 }); // Trigger when 50% of the item is visible
+
+                observer.observe(counter); // Start observing each counter
+            });
+
+
+            // 4. Swiper.js for Screenshot Section
+            const screenshotSwiper = new Swiper('.screenshot-swiper', {
+                loop: true, // Enable infinite loop
+                slidesPerView: 1,
+                spaceBetween: 0, 
+                centeredSlides: true,
+                effect: 'slide', 
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                grabCursor: true, // Show grab cursor on hover
+
+                // Shake animation for screenshot when slide changes
+                on: {
+                    slideChangeTransitionEnd: function () {
+                        // Get the current active slide's image
+                        const currentScreenshot = this.slides[this.activeIndex].querySelector('img');
+                        if (currentScreenshot) {
+                            gsap.fromTo(currentScreenshot, 
+                                { x: -5, rotation: -1 }, // Start slightly left and rotated
+                                { 
+                                    x: 5, 
+                                    rotation: 1, 
+                                    duration: 0.1, 
+                                    repeat: 3, // Shake 3 times
+                                    yoyo: true, 
+                                    ease: "power1.inOut", 
+                                    clearProps: "all" // Remove inline styles after animation
+                                } 
+                            );
+                        }
+                    },
+                },
+            });
+
+            // 5. Download Button Animations (GSAP)
+            const downloadBtn = document.querySelector('.download-btn');
+            const downloadArrow = downloadBtn.querySelector('.arrow');
+
+            // Pulse effect for the button (scale and box-shadow)
+            gsap.to(downloadBtn, {
+                scale: 1.02, // Slightly enlarge
+                boxShadow: '0 0 25px rgba(0, 255, 255, 0.4), 0 0 50px rgba(240, 0, 255, 0.3)', // Glow effect
+                repeat: -1, // Infinite repeat
+                yoyo: true, // Go back and forth
+                duration: 1.5,
+                ease: "power1.inOut"
+            });
+
+            // Arrow animation (move right and fade slightly)
+            gsap.to(downloadArrow, {
+                x: 8, // Move 8px to the right
+                opacity: 0.8,
+                repeat: -1,
+                yoyo: true,
+                duration: 0.6,
+                ease: "power1.inOut"
+            });
+        });
+    </script>
+</body>
+</html>
